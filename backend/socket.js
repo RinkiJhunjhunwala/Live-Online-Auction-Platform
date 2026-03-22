@@ -6,7 +6,7 @@ let io;
 function initSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || '*',
+      origin: process.env.CLIENT_URL || "https://live-online-auction-platform.vercel.app",
       methods: ["GET", "POST"]
     }
   });

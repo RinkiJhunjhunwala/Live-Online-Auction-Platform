@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://live-online-auction-platform.onrender.com';
 
 export async function fetchJson(endpoint, options = {}) {
   const url = `${BACKEND_URL}${endpoint}`;

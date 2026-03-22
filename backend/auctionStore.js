@@ -1,11 +1,11 @@
 // auctionStore.js
 
 const AUCTION_ITEMS_TEMPLATE = [
-  { id: '1', name: 'Vintage Rolex Daytona', startingBid: 5000, durationSeconds: 30 },
-  { id: '2', name: 'Original Picasso Sketch', startingBid: 12000, durationSeconds: 45 },
-  { id: '3', name: 'Signed Michael Jordan Jersey', startingBid: 8000, durationSeconds: 60 },
-  { id: '4', name: '1969 Fender Stratocaster', startingBid: 3000, durationSeconds: 90 },
-  { id: '5', name: 'First Edition Harry Potter', startingBid: 500, durationSeconds: 120 }
+  { id: '1', name: 'Vintage Rolex Daytona', startingBid: 1000, durationSeconds: 30 },
+  { id: '2', name: 'Original Picasso Sketch', startingBid: 2500, durationSeconds: 45 },
+  { id: '3', name: 'Signed Michael Jordan Jersey', startingBid: 500, durationSeconds: 60 },
+  { id: '4', name: '1969 Fender Stratocaster', startingBid: 250, durationSeconds: 90 },
+  { id: '5', name: 'First Edition Harry Potter', startingBid: 100, durationSeconds: 120 }
 ];
 
 let itemsStore = {};

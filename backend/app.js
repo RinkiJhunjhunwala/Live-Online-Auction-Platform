@@ -5,7 +5,10 @@ const auctionStore = require('./auctionStore');
 const app = express();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || "https://live-online-auction-platform.vercel.app"
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
+  credentials: true
 }));
 app.use(express.json());
 

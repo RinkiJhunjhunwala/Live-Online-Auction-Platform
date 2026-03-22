@@ -1,0 +1,11 @@
+{
+  "name": "auction-root-deploy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root proxy for Render deployment",
+  "scripts": {
+    "install": "cd backend && npm install",
+    "build": "cd backend && npm install",
+    "start": "cd backend && node server.js"
+  }
+}

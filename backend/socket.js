@@ -1,5 +1,7 @@
 const { Server } = require('socket.io');
 const auctionStore = require('./auctionStore');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const { pubClient, subClient } = require('./redisClient');
 
 let io;
 
@@ -12,45 +14,28 @@ function initSocket(server) {
     }
   });
 
+  io.adapter(createAdapter(pubClient, subClient));
+
   io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    socket.on('BID_PLACED', (data) => {
+    socket.on('BID_PLACED', async (data) => {
       const { itemId, bidAmount, userId } = data;
-      const item = auctionStore.getById(itemId);
-
-      // Validate item exists
-      if (!item) {
-        return socket.emit('BID_ERROR', { itemId, error: 'Item not found' });
+      
+      const result = await auctionStore.placeBid(itemId, bidAmount, userId);
+      
+      if (result.error) {
+        return socket.emit('BID_ERROR', { itemId, error: result.error });
       }
 
-      // Validate auction is active
-      if (item.status !== 'active') {
-        return socket.emit('BID_ERROR', { itemId, error: 'Auction is not currently active' });
-      }
+      // Fetch newly updated item data to send out
+      const updatedItem = await auctionStore.getById(itemId);
 
-      // Validate time
-      if (Date.now() > item.endTime) {
-        return socket.emit('BID_ERROR', { itemId, error: 'Auction has already ended' });
-      }
+      // Broadcast the updated item to all clients attached to any backend node via adapter
+      io.emit('UPDATE_BID', updatedItem);
 
-      // Validate bid amount
-      if (bidAmount <= item.currentBid) {
-        return socket.emit('BID_ERROR', { itemId, error: `Bid must be higher than the current bid of ${item.currentBid}` });
-      }
-
-      const previousHighestBidder = item.highestBidder;
-
-      // Update store state
-      item.currentBid = bidAmount;
-      item.highestBidder = userId;
-
-      // Broadcast the updated item to all clients
-      io.emit('UPDATE_BID', item);
-
-      // If there was a previous bidder and it's not the same user, broadcast an OUTBID event
-      if (previousHighestBidder && previousHighestBidder !== userId) {
-        io.emit('OUTBID', { itemId, outbidUserId: previousHighestBidder });
+      if (result.previousBidder && result.previousBidder !== userId) {
+        io.emit('OUTBID', { itemId, outbidUserId: result.previousBidder });
       }
     });
 

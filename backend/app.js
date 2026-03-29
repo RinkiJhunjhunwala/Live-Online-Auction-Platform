@@ -18,9 +18,13 @@ app.get('/health', (req, res) => {
 });
 
 // Get all auction items endpoint
-app.get('/items', (req, res) => {
-  const items = auctionStore.getAll();
-  res.status(200).json(items);
+app.get('/items', async (req, res) => {
+  try {
+    const items = await auctionStore.getAll();
+    res.status(200).json(items);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch items from Redis' });
+  }
 });
 
 // 404 handler

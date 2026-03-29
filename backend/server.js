@@ -10,7 +10,7 @@ const io = initSocket(server);
 
 const PORT = process.env.PORT || 3000;
 const BREAK_DURATION_MS = 10000; // 10 seconds break between auctions
-const TICK_RATE_MS = 1000; // 1 second interval
+const TICK_RATE_MS = 100; // Fast 100ms interval for snappy transitions
 
 connectRedis().then(async () => {
   await auctionStore.initStore();
@@ -22,7 +22,7 @@ connectRedis().then(async () => {
       const now = Date.now();
       let stateChanged = false;
 
-      for (const item of items) {
+      const updates = items.map(async (item) => {
         if (item.status === 'active' && now >= item.endTime) {
           await auctionStore.setItemBreakStartTime(item.id, now);
           stateChanged = true;
@@ -30,7 +30,9 @@ connectRedis().then(async () => {
           await auctionStore.resetItem(item.id);
           stateChanged = true;
         }
-      }
+      });
+
+      await Promise.all(updates);
 
       if (stateChanged) {
         const updatedItems = await auctionStore.getAll();

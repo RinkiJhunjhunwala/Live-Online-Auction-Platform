@@ -84,9 +84,18 @@ const placeBidLua = `
   local currentBid = tonumber(redis.call('HGET', id, 'currentBid'))
   if newBid <= currentBid then return {err = "Bid must be higher than the current bid of " .. currentBid} end
   
+  -- Anti-Sniping (Soft Close)
+  -- If a bid is placed within the final 30 seconds (30000ms), 
+  -- mathematically extend the auction to ensure exactly 30 full seconds remain for counter bids
+  local timeRemaining = endTime - now
+  if timeRemaining <= 30000 then
+     endTime = now + 30000
+     redis.call('HSET', id, 'endTime', tostring(endTime))
+  end
+  
   -- Update
   local previousBidder = redis.call('HGET', id, 'highestBidder')
-  redis.call('HSET', id, 'currentBid', newBid)
+  redis.call('HSET', id, 'currentBid', tostring(newBid))
   redis.call('HSET', id, 'highestBidder', userId)
   
   return previousBidder
